@@ -2,6 +2,8 @@ from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render
 from django.views import View
 
+from vacancies.models import Specialty, Company
+
 
 def custom_handler404(request, exception):
     return HttpResponseNotFound(' Ой, страницы не существует... Простите извините!')
@@ -15,8 +17,14 @@ class MainView(View):
     template_name = 'index.html'
 
     def get(self, request):
+        all_speciality = Specialty.objects.all()
+        all_company = Company.objects.all()
+        context = {
+            "all_speciality": all_speciality,
+            "all_company": all_company
+        }
 
-        return render(request, self.template_name)
+        return render(request, self.template_name, context)
 
 
 class CompanyView(View):
