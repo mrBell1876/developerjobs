@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 from vacancies.views import custom_handler404, custom_handler500, MainView
+
 
 handler404 = custom_handler404
 handler500 = custom_handler500
@@ -26,3 +29,6 @@ urlpatterns = [
     path('', MainView.as_view(), name="main"),
     path('', include('vacancies.urls')),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
