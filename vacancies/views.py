@@ -1,6 +1,9 @@
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponseServerError, Http404
 from django.shortcuts import render
 from django.views import View
+from django.views.generic import CreateView
 
 from vacancies.models import Specialty, Company, Vacancy
 
@@ -11,6 +14,17 @@ def custom_handler404(request, *args, **argv):
 
 def custom_handler500(request, *args, **argv):
     return HttpResponseServerError('Ой, ошибка сервера... Простите извините!')
+
+
+class MySignupView(CreateView):
+    form_class = UserCreationForm
+    success_url = 'login'
+    template_name = 'register.html'
+
+
+class MyLoginView(LoginView):
+    redirect_authenticated_user = True
+    template_name = 'login.html'
 
 
 class MainView(View):
@@ -79,3 +93,31 @@ class VacancyView(View):
             "vacancy": vacancy
         }
         return render(request, self.template_name, context)
+
+
+class SendApplicationView(View):
+    template_name = 'sent.html'
+
+    def get(self, request, **argv):
+        return render(request, self.template_name)
+
+
+class MyCompanyView(View):
+    template_name = 'sent.html'
+
+    def get(self, request, **argv):
+        return render(request, self.template_name)
+
+
+class MyVacanciesView(View):
+    template_name = 'vacancy-list.html'
+
+    def get(self, request, **argv):
+        return render(request, self.template_name)
+
+
+class EditVacancyView(View):
+    template_name = 'vacancy-edit.html'
+
+    def get(self, request, vacancy_id):
+        return render(request, self.template_name)

@@ -17,14 +17,13 @@ class Company(models.Model):
     owner = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='company')
 
 
-
 class Specialty(models.Model):
     code = models.CharField(max_length=20)
     title = models.CharField(max_length=70)
     picture = models.ImageField(upload_to=MEDIA_SPECIALITY_IMAGE_DIR, height_field='height_field',
                                 width_field='width_field')
-    height_field = 100
-    width_field = 60
+    height_field = 80
+    width_field = 80
 
 
 class Vacancy(models.Model):

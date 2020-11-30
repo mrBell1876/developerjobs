@@ -14,18 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from vacancies.views import custom_handler404, custom_handler500, MainView
-
+from vacancies.views import custom_handler404, custom_handler500, MainView, MySignupView, MyLoginView
 
 handler404 = custom_handler404
 handler500 = custom_handler500
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', MyLoginView.as_view()),
+    path('logout/', LogoutView.as_view()),
+    path('signup/', MySignupView.as_view()),
     path('', MainView.as_view(), name="main"),
     path('', include('vacancies.urls')),
 ]
