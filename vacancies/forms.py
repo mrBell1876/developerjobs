@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.validators import RegexValidator
 from django.forms import ModelForm
 
-from vacancies.models import Company
+from vacancies.models import Company, Vacancy
 
 PATTERN_PHONE_VALIDATOR = RegexValidator(r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$',
                                          "Введите номер вида +7 XXX XXX XX XX")
@@ -90,8 +90,59 @@ class MyCompanyEditForm(ModelForm):
                 Submit('submit', 'Сохранить'),
             )
         )
+class ApplicationForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Отправить отклик', css_class='btn btn-primary mt-4 mb-2'))
+
+        self.helper.form_class = 'form-label-group  pt-5'
+        self.helper.label_class = 'mb-1'
+
+    name = forms.CharField(min_length=2, max_length=20, label="Вас зовут")
+    phone = forms.CharField(min_length=6, max_length=12,label="Телефон", validators=[PATTERN_PHONE_VALIDATOR])
+    message = forms.CharField(widget=forms.Textarea, label="Сопроводительное сообщение")
 
 
+class MyVacancyEditForm(ModelForm):
+    class Meta:
+        model = Vacancy
+        fields = ['title', 'specialty', 'skills', 'description', 'salary_min', 'salary_max']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+
+        self.helper = FormHelper()
+
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+
+            Row(
+                Column('title', css_class='form-group col-md-6 mb-0'),
+                Column('specialty', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row',
+            ),
+            Row(
+                Column('salary_min', css_class='form-group col-md-6 mb-0'),
+                Column('salary_max', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row',
+            ),
+            Row(
+                Column('skills', css_class='form-group mb-0'),
+                css_class='form-row',
+            ),
+            Row(
+                Column('description', css_class='form-group mb-0'),
+                css_class='form-row',
+            ),
+            FormActions(
+                Submit('submit', 'Сохранить'),
+            )
+        )
 
 
 

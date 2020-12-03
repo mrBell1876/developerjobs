@@ -1,11 +1,15 @@
+from datetime import datetime
+
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import CreateView
 
-from vacancies.forms import RegisterForm, LoginForm, ApplicationForm, MyCompanyEditForm
+from vacancies.forms import RegisterForm, LoginForm, ApplicationForm, MyCompanyEditForm, MyVacancyEditForm
 from vacancies.models import Specialty, Company, Vacancy, Application
 
 
@@ -145,8 +149,12 @@ class SendApplicationView(View):
 class MyCompanyView(View):
     template_name = 'my-company.html'
 
-    def get(self, request,  **argv):
-        if request.user.company.owner is None:
+    @method_decorator(login_required)
+    def get(self, request, **argv):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect("letsstart/")
+
+        if not Company.objects.filter(owner=request.user):
             return HttpResponseRedirect("letsstart/")
         else:
             company = Company.objects.get(owner=request.user)
@@ -157,12 +165,19 @@ class MyCompanyView(View):
             return render(request, self.template_name, context)
 
     def post(self, request, **argv):
-        company_form = MyCompanyEditForm(request.POST, request.FILES)
+        company = Company.objects.get(owner=request.user)
+        company_form = MyCompanyEditForm(request.POST, request.FILES, instance=company)
+
         if company_form.is_valid():
             company = company_form.save(commit=False)
             company.owner = request.user
             company.save()
-            return HttpResponseRedirect("/")
+            context = {
+
+                "form": company_form,
+                "success_send": True
+            }
+            return render(request, self.template_name, context)
         else:
             context = {
 
@@ -175,17 +190,18 @@ class MyCompanyStart(View):
     template_name = 'my-company-lets-start.html'
 
     def get(self, request, **argv):
-        if request.user.company.owner is None:
-            return HttpResponseRedirect("../")
-        else:
-            return render(request, self.template_name)
+        return render(request, self.template_name)
 
 
 class MyCompanyCreateView(View):
     template_name = 'my-company-create.html'
     form_class = MyCompanyEditForm()
+    success_url = '/mycompany'
 
+    @method_decorator(login_required)
     def get(self, request, **argv):
+        if Company.objects.filter(owner=request.user):
+            return HttpResponseRedirect(self.success_url)
         context = {
             "form": self.form_class
         }
@@ -197,7 +213,7 @@ class MyCompanyCreateView(View):
             company = form_class.save(commit=False)
             company.owner = request.user
             company.save()
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect(self.success_url)
         else:
             context = {
 
@@ -205,40 +221,85 @@ class MyCompanyCreateView(View):
             }
             return render(request, self.template_name, context)
 
-
-class MyCompanyEditView(View):
-    template_name = 'my-company.html'
-    form_class = MyCompanyEditForm()
-
-    def get(self, request, **argv):
-        context = {
-            "form": self.form_class
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request, **argv):
-        form_class = MyCompanyEditForm(request.POST, request.FILES)
-        if form_class.is_valid():
-            company = form_class.save(commit=False)
-            company.owner = request.user
-            company.save()
-            return HttpResponseRedirect("/")
-        else:
-            context = {
-
-                "form": form_class
-            }
-            return render(request, self.template_name, context)
 
 class MyVacanciesView(View):
     template_name = 'vacancy-list.html'
 
+    @method_decorator(login_required)
     def get(self, request, **argv):
-        return render(request, self.template_name)
+        company_vacancies = Vacancy.objects.filter(company__id=request.user.company.id)
+        context = {
+            "company_vacancies": company_vacancies,
+        }
+        return render(request, self.template_name, context)
 
 
 class EditVacancyView(View):
     template_name = 'vacancy-edit.html'
 
-    def get(self, request, vacancy_id):
-        return render(request, self.template_name)
+    @method_decorator(login_required)
+    def get(self, request, vacancy_id, **argv):
+        if not Vacancy.objects.filter(id=vacancy_id, company=request.user.company):
+            return HttpResponseRedirect("/")
+        else:
+            vacancy = Vacancy.objects.get(id=vacancy_id)
+            vacancy_form = MyVacancyEditForm(instance=vacancy)
+            applications_list = Application.objects.filter(vacancy=vacancy)
+            context = {
+                "form": vacancy_form,
+                "vacancy": vacancy,
+                "applications_list": applications_list,
+            }
+            return render(request, self.template_name, context)
+
+    def post(self, request, vacancy_id, **argv):
+        select_vacancy = Vacancy.objects.get(id=vacancy_id)
+        vacancy_form = MyVacancyEditForm(request.POST, instance=select_vacancy)
+
+        if vacancy_form.is_valid():
+            vacancy = vacancy_form.save(commit=False)
+            vacancy.company = request.user.company
+            vacancy.published_at = datetime.now().date()
+            vacancy.save()
+            context = {
+
+                "form": vacancy_form,
+                "success_send": True,
+            }
+            return render(request, self.template_name, context)
+        else:
+            context = {
+
+                "form": vacancy_form
+            }
+            return render(request, self.template_name, context)
+
+
+class CreateVacancyView(View):
+    template_name = 'vacancy-create.html'
+
+    @method_decorator(login_required)
+    def get(self, request, **argv):
+        vacancy_form = MyVacancyEditForm()
+        context = {
+            "form": vacancy_form,
+            "vacancy": {'title': "Создайте новую вакансию"},
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, **argv):
+        vacancy_form = MyVacancyEditForm(request.POST)
+        success_url = '/mycompany/vacancies/'
+        if vacancy_form.is_valid():
+            vacancy = vacancy_form.save(commit=False)
+            vacancy.company = request.user.company
+            vacancy.published_at = datetime.now().date()
+            vacancy.save()
+            return HttpResponseRedirect(success_url)
+
+        else:
+            context = {
+
+                "form": vacancy_form
+            }
+            return render(request, self.template_name, context)

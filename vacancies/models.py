@@ -25,15 +25,17 @@ class Specialty(models.Model):
     height_field = 80
     width_field = 80
 
+    def __str__(self):
+        return self.title
 
 class Vacancy(models.Model):
-    title = models.CharField(max_length=70)
-    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, related_name='vacancies')
+    title = models.CharField(max_length=70, verbose_name='Название вакансии')
+    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, verbose_name='Специализация', related_name='vacancies')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='vacancies')
-    skills = models.TextField()
-    description = models.TextField()
-    salary_min = models.IntegerField()
-    salary_max = models.IntegerField()
+    skills = models.TextField(verbose_name='Навыки')
+    description = models.TextField(verbose_name='Описание вакансии')
+    salary_min = models.IntegerField(verbose_name='Зарплата от')
+    salary_max = models.IntegerField(verbose_name='Зарплата до')
     published_at = models.DateField()
 
 
