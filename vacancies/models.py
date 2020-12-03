@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.db import models
 
 # Create your models here.
@@ -6,14 +6,14 @@ from developerjobs.settings import MEDIA_COMPANY_IMAGE_DIR, MEDIA_SPECIALITY_IMA
 
 
 class Company(models.Model):
-    name = models.CharField(max_length=70)
-    location = models.CharField(max_length=70)
+    name = models.CharField(max_length=70, verbose_name="Название компании")
+    location = models.CharField(max_length=70, verbose_name="География")
     logo = models.ImageField(upload_to=MEDIA_COMPANY_IMAGE_DIR, height_field='height_field',
-                             width_field='width_field')
+                             width_field='width_field', verbose_name="Логотип")
     height_field = 100
     width_field = 60
-    description = models.TextField()
-    employee_count = models.IntegerField()
+    description = models.TextField(verbose_name="Информация о компании")
+    employee_count = models.IntegerField(verbose_name="Количество человек в компании")
     owner = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='company')
 
 
@@ -42,4 +42,4 @@ class Application(models.Model):
     written_phone = models.IntegerField()
     written_cover_letter = models.TextField()
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='applications')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='applications')

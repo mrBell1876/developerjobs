@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'vacancies'
+    'vacancies',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -121,6 +122,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'media'
@@ -128,4 +130,6 @@ MEDIA_COMPANY_IMAGE_DIR = 'company_images'
 MEDIA_SPECIALITY_IMAGE_DIR = 'speciality_images'
 
 STATIC_URL = '/static/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 

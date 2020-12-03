@@ -26,9 +26,9 @@ handler500 = custom_handler500
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', MyLoginView.as_view()),
-    path('logout/', LogoutView.as_view()),
-    path('signup/', MySignupView.as_view()),
+    path('login/', MyLoginView.as_view(), name="login"),
+    path('logout/', LogoutView.as_view(), name="logout"),
+    path('signup/', MySignupView.as_view(), name="signup"),
     path('', MainView.as_view(), name="main"),
     path('', include('vacancies.urls')),
 ]
