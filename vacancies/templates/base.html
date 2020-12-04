@@ -7,7 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
    {% url 'my_company' as url_my_company %}
-  {% if url_my_company in request.path  %}
+    {% url 'my_resume' as url_my_resume %}
+  {% if url_my_company in request.path or url_my_resume in request.path %}
   <style>
     body {
       background-color: #F6F2E6;
@@ -44,7 +45,7 @@
               </button>
               <div class="dropdown-menu dropdown-menu-right mt-3">
                 <a href="#" class="dropdown-item py-2">Профиль</a>
-                <a href="#" class="dropdown-item py-2">Резюме</a>
+                <a href="{% url 'my_resume' %}" class="dropdown-item py-2">Резюме</a>
                 <a href="{% url 'my_company' %}" class="dropdown-item py-2">Компания</a>
                 <a href="{% url 'logout' %}" class="dropdown-item py-2">Выйти</a>
               </div>

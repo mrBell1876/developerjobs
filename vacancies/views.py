@@ -1,16 +1,19 @@
 from datetime import datetime
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
+from django.db.models import Q
 from django.http import HttpResponseNotFound, HttpResponseServerError, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import CreateView
 
-from vacancies.forms import RegisterForm, LoginForm, ApplicationForm, MyCompanyEditForm, MyVacancyEditForm
-from vacancies.models import Specialty, Company, Vacancy, Application
+from vacancies.forms import RegisterForm, LoginForm, ApplicationForm, MyCompanyEditForm, MyVacancyEditForm, SearchForm, \
+    MyResumeEditForm
+from vacancies.models import Specialty, Company, Vacancy, Application, Resume
 
 
 def custom_handler404(request, *args, **argv):
@@ -50,13 +53,15 @@ class MyLoginView(LoginView):
 
 class MainView(View):
     template_name = 'index.html'
+    form_search = SearchForm()
 
     def get(self, request):
         all_speciality = Specialty.objects.all()
         all_company = Company.objects.all()
         context = {
             "all_speciality": all_speciality,
-            "all_company": all_company
+            "all_company": all_company,
+            "form": self.form_search
         }
 
         return render(request, self.template_name, context)
@@ -79,11 +84,13 @@ class CompanyView(View):
 
 class VacanciesAllView(View):
     template_name = 'vacancies.html'
+    search_form = SearchForm
 
     def get(self, request):
         all_vacancy = Vacancy.objects.all()
         context = {
             "all_vacancy": all_vacancy,
+            'form': self.search_form
         }
         return render(request, self.template_name, context)
 
@@ -148,14 +155,13 @@ class SendApplicationView(View):
 
 class MyCompanyView(View):
     template_name = 'my-company.html'
+    start_url = "letsstart/"
 
     @method_decorator(login_required)
     def get(self, request, **argv):
-        if not request.user.is_authenticated:
-            return HttpResponseRedirect("letsstart/")
 
         if not Company.objects.filter(owner=request.user):
-            return HttpResponseRedirect("letsstart/")
+            return HttpResponseRedirect(self.start_url)
         else:
             company = Company.objects.get(owner=request.user)
             company_form = MyCompanyEditForm(instance=company)
@@ -172,10 +178,10 @@ class MyCompanyView(View):
             company = company_form.save(commit=False)
             company.owner = request.user
             company.save()
+            messages.success(request, 'Информация о компании обновлена')
             context = {
 
                 "form": company_form,
-                "success_send": True
             }
             return render(request, self.template_name, context)
         else:
@@ -210,6 +216,7 @@ class MyCompanyCreateView(View):
     def post(self, request, **argv):
         form_class = MyCompanyEditForm(request.POST, request.FILES)
         if form_class.is_valid():
+            messages.success(request, 'Компания успешно создана')
             company = form_class.save(commit=False)
             company.owner = request.user
             company.save()
@@ -291,6 +298,7 @@ class CreateVacancyView(View):
         vacancy_form = MyVacancyEditForm(request.POST)
         success_url = '/mycompany/vacancies/'
         if vacancy_form.is_valid():
+            messages.success(request, 'Вакансия успешно создана')
             vacancy = vacancy_form.save(commit=False)
             vacancy.company = request.user.company
             vacancy.published_at = datetime.now().date()
@@ -303,3 +311,103 @@ class CreateVacancyView(View):
                 "form": vacancy_form
             }
             return render(request, self.template_name, context)
+
+
+class MyResume(View):
+    template_name = 'resume-edit.html'
+    start_url = 'letsstart/'
+
+    @method_decorator(login_required)
+    def get(self, request, **argv):
+        if not Resume.objects.filter(user=request.user):
+            return HttpResponseRedirect(self.start_url)
+
+        resume = Resume.objects.get(user=request.user)
+        resume_form = MyResumeEditForm(instance=resume)
+        context = {
+            "form": resume_form
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, **argv):
+        resume = Resume.objects.get(user=request.user)
+        resume_form = MyResumeEditForm(request.POST, instance=resume)
+
+        if resume_form.is_valid():
+            resume = resume_form.save(commit=False)
+            resume.user = request.user
+            resume.save()
+            messages.success(request, 'Информация о вакансии обновлена')
+            context = {
+
+                "form": resume_form,
+            }
+            return render(request, self.template_name, context)
+        else:
+            context = {
+
+                "form": vacancy_form
+            }
+            return render(request, self.template_name, context)
+
+
+class MyResumeStart(View):
+    template_name = 'resume-lets-start.html'
+
+    @method_decorator(login_required)
+    def get(self, request, **argv):
+        return render(request, self.template_name)
+
+
+class MyResumeCreate(View):
+    template_name = 'resume-create.html'
+    resume_form = MyResumeEditForm
+    success_url = '/myresume/'
+
+    @method_decorator(login_required)
+    def get(self, request, **argv):
+        if Resume.objects.filter(user=request.user):
+            return HttpResponseRedirect(self.success_url)
+        context = {
+            "form": self.resume_form
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, **argv):
+        resume_form = MyResumeEditForm(request.POST)
+        if resume_form.is_valid():
+            messages.success(request, 'Резюме успешно создано')
+            resume = resume_form.save(commit=False)
+            resume.user = request.user
+            resume.save()
+            return HttpResponseRedirect(self.success_url)
+        else:
+            context = {
+
+                "form": resume_form
+            }
+            return render(request, self.template_name, context)
+
+
+
+
+class Search(View):
+    template_name = 'search.html'
+
+    def get(self, request, **argv):
+        search_form = SearchForm
+        context = {'form': search_form}
+        query = self.request.GET.get('find')
+        if query is not None:
+            vacancy_list = Vacancy.objects.filter(
+                Q(title__icontains=query) | Q(skills__icontains=query) | Q(description__icontains=query)
+            )
+            context = {
+                'vacancy_list': vacancy_list,
+                'form': SearchForm(request.GET)
+            }
+            return render(request, self.template_name, context)
+
+        return render(request, self.template_name, context)
+
+

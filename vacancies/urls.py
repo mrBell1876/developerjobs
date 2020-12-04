@@ -1,7 +1,8 @@
 from django.urls import path
 
 from vacancies.views import CompanyView, VacancyView, VacanciesAllView, VacanciesSpecialView, SendApplicationView, \
-    MyCompanyView, MyVacanciesView, EditVacancyView, MyCompanyStart, MyCompanyCreateView, CreateVacancyView
+    MyCompanyView, MyVacanciesView, EditVacancyView, MyCompanyStart, MyCompanyCreateView, CreateVacancyView, MyResume, \
+    Search, MyResumeCreate, MyResumeStart
 
 urlpatterns = [
     path('vacancies/', VacanciesAllView.as_view(), name="vacancies_all"),
@@ -15,4 +16,9 @@ urlpatterns = [
     path('mycompany/vacancies/', MyVacanciesView.as_view(), name="my_vacancies"),
     path('mycompany/vacancies/<int:vacancy_id>/', EditVacancyView.as_view(), name="edit_vacancy"),
     path('mycompany/vacancies/create/', CreateVacancyView.as_view(), name="create_vacancy"),
+    path('myresume/', MyResume.as_view(), name="my_resume"),
+    path('myresume/letsstart/', MyResumeStart.as_view(), name="my_resume_start"),
+    path('myresume/create/', MyResumeCreate.as_view(), name="my_resume_create"),
+    path('search/', Search.as_view(), name="search"),
+
     ]

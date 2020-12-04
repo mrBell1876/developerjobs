@@ -16,6 +16,9 @@ class Company(models.Model):
     employee_count = models.IntegerField(verbose_name="Количество человек в компании")
     owner = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='company')
 
+    def __str__(self):
+        return self.name
+
 
 class Specialty(models.Model):
     code = models.CharField(max_length=20)
@@ -38,6 +41,9 @@ class Vacancy(models.Model):
     salary_max = models.IntegerField(verbose_name='Зарплата до')
     published_at = models.DateField()
 
+    def __str__(self):
+        return self.title
+
 
 class Application(models.Model):
     written_username = models.CharField(max_length=20)
@@ -45,3 +51,32 @@ class Application(models.Model):
     written_cover_letter = models.TextField()
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='applications')
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='applications')
+
+    def __str__(self):
+        return self.written_username
+
+
+class Resume(models.Model):
+
+    grade_CHOICES = (
+                        ('TR', 'Стажер'),
+                        ('JN', 'Джуниор'),
+                        ('ML', 'Миддл'),
+                        ('SN', 'Синьор'),
+                        ('LD', 'Лид'))
+    status_CHOISES = (
+        ('busy', 'Не ищу работу'),
+        ('open', 'Рассматриваю предложения'),
+        ('find', 'Ищу работу')
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='resume')
+    name = models.CharField(max_length=20, verbose_name='Имя')
+    surname = models.CharField(max_length=20, verbose_name='Фамилия')
+    status_CHOISES = models.CharField(max_length=100, verbose_name='Готовность к работе', choices=status_CHOISES)
+    salary = models.IntegerField(verbose_name='Зарплата')
+    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, verbose_name='Специализация', related_name='resume')
+    grade = models.CharField(max_length=100, verbose_name='Квалификация', choices=grade_CHOICES)
+    education = models.CharField(max_length=100, verbose_name='Образование')
+    experience = models.TextField(verbose_name='Описание вакансии')
+    portfolio = models.URLField(max_length=200, verbose_name="ссылка на портфолио")

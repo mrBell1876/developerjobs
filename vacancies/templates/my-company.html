@@ -7,14 +7,18 @@
             <!-- Tab -->
             <section class="tab-pane fade show active">
               <h2 class="h4 pt-2 pb-3">Информация о&nbsp;компании</h2>
-              {% if success_send %}
+                {% if messages %}
+                {% for message in messages %}
               <p class="alert alert-info" role="alert">
-                Информация о компании обновлена
-              </p>{% endif%}
+                 {{ message }}
+              </p>
+                {% endfor %}
+                {% endif %}
                {% load crispy_forms_tags %}
                   {% crispy form form.helper %}
             </section>
             <!-- END Tab -->
+
           </div>
         </div>
       </div>
