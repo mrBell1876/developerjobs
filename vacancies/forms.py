@@ -10,6 +10,12 @@ from vacancies.models import Company, Vacancy, Resume
 
 PATTERN_PHONE_VALIDATOR = RegexValidator(r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$',
                                          "Введите номер вида +7 XXX XXX XX XX")
+PATTERN_LOGIN_VALIDATOR = RegexValidator(r'^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$',
+                                         "Длина логина 2-20 символов, которыми могут быть буквы и"
+                                         " цифры, первый символ обязательно буква")
+PATTERN_PASSWORD_VALIDATOR = RegexValidator(r'(?=[#$-/:-?{-~!"^_`\[\]a-zA-Z]*([0-9#$-/:-?{-~!"^_`\[\]]))(?=[#$-/:-?{'
+                                            r'-~!"^_`\[\]a-zA-Z0-9]*[a-zA-Z])[#$-/:-?{-~!"^_`\[\]a-zA-Z0-9]{4,}',
+                                            "Можно использовать только строчные и прописные латинские буквы, цифры")
 
 
 class RegisterForm(forms.Form):
@@ -26,8 +32,9 @@ class RegisterForm(forms.Form):
 
     first_name = forms.CharField(min_length=2, max_length=20, label="Имя")
     last_name = forms.CharField(min_length=2, max_length=20, label="Фамилия")
-    login = forms.CharField(min_length=3, label="Логин", required='autofocus')
-    password = forms.CharField(min_length=6, label="Пароль", widget=forms.PasswordInput())
+    login = forms.CharField(min_length=3, label="Логин", required='autofocus', validators=[PATTERN_LOGIN_VALIDATOR])
+    password = forms.CharField(min_length=6, label="Пароль",
+                               widget=forms.PasswordInput(), validators=[PATTERN_PASSWORD_VALIDATOR])
 
 
 class LoginForm(AuthenticationForm):
@@ -92,23 +99,6 @@ class MyCompanyEditForm(ModelForm):
         )
 
 
-class ApplicationForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Отправить отклик', css_class='btn btn-primary mt-4 mb-2'))
-
-        self.helper.form_class = 'form-label-group  pt-5'
-        self.helper.label_class = 'mb-1'
-
-    name = forms.CharField(min_length=2, max_length=20, label="Вас зовут")
-    phone = forms.CharField(min_length=6, max_length=12, label="Телефон", validators=[PATTERN_PHONE_VALIDATOR])
-    message = forms.CharField(widget=forms.Textarea, label="Сопроводительное сообщение")
-
-
 class MyVacancyEditForm(ModelForm):
     class Meta:
         model = Vacancy
@@ -146,6 +136,7 @@ class MyVacancyEditForm(ModelForm):
             )
         )
 
+
 class MyResumeEditForm(ModelForm):
     class Meta:
         model = Resume
@@ -172,7 +163,6 @@ class MyResumeEditForm(ModelForm):
                 css_class='form-row',
             ),
 
-
             Row(
                 Column('specialty', css_class='form-group mb-0'),
                 Column('grade', css_class='form-group mb-0'),
@@ -195,6 +185,7 @@ class MyResumeEditForm(ModelForm):
                 Submit('submit', 'Сохранить'),
             )
         )
+
 
 class SearchForm(forms.Form):
     find = forms.CharField(min_length=2, max_length=40, label=False,

@@ -1,8 +1,11 @@
 from django.urls import path
 
-from vacancies.views import CompanyView, VacancyView, VacanciesAllView, VacanciesSpecialView, SendApplicationView, \
-    MyCompanyView, MyVacanciesView, EditVacancyView, MyCompanyStart, MyCompanyCreateView, CreateVacancyView, MyResume, \
-    Search, MyResumeCreate, MyResumeStart
+from vacancies.views.public import CompanyView, VacancyView, VacanciesAllView,\
+    VacanciesSpecialView, SendApplicationView, Search
+from vacancies.views.my_resume import MyResume, MyResumeCreate, MyResumeStart
+from vacancies.views.my_company import MyCompanyView, MyVacanciesView, EditVacancyView,\
+    MyCompanyStart, MyCompanyCreateView, CreateVacancyView
+
 
 urlpatterns = [
     path('vacancies/', VacanciesAllView.as_view(), name="vacancies_all"),

@@ -19,7 +19,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from vacancies.views import custom_handler404, custom_handler500, MainView, MySignupView, MyLoginView
+from vacancies.views.authorization_users import MyLoginView, MySignupView
+from vacancies.views.public import custom_handler404, custom_handler500, MainView
+
 
 handler404 = custom_handler404
 handler500 = custom_handler500

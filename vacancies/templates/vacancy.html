@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block container %}
-{% load my_tags %}
+{% load additional_tags %}
     <div class="row mt-5">
       <div class="col-12 col-lg-2">
         <div class="pl-3 mb-5">
@@ -15,7 +15,7 @@
             <p class="m-0 pl-3">{{ vacancy.salary_min }} – {{ vacancy.salary_max }} Р</p>
           </div>
           <p class="mt-2">{{ vacancy.specialty.title }} • {{ vacancy.skills|split:","|join:" • " }}</p>
-          <p class="text-muted mb-4">{{ vacancy.company.name}} ({{ vacancy.company.employee_count }} человек), Рязань или удаленно</p>
+          <p class="text-muted mb-4">{{ vacancy.company.name}} ({{ vacancy.company.employee_count }} человек), {{vacancy.company.location}}</p>
           <div style="line-height: 1.8;">
             <p>{{ vacancy.company.description }}</p>
             <p>{{ vacancy.description|safe }}

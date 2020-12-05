@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.db import models
 
 # Create your models here.
@@ -14,7 +14,7 @@ class Company(models.Model):
     width_field = 60
     description = models.TextField(verbose_name="Информация о компании")
     employee_count = models.IntegerField(verbose_name="Количество человек в компании")
-    owner = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='company')
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='company')
 
     def __str__(self):
         return self.name
@@ -31,9 +31,11 @@ class Specialty(models.Model):
     def __str__(self):
         return self.title
 
+
 class Vacancy(models.Model):
     title = models.CharField(max_length=70, verbose_name='Название вакансии')
-    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, verbose_name='Специализация', related_name='vacancies')
+    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE,
+                                  verbose_name='Специализация', related_name='vacancies')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='vacancies')
     skills = models.TextField(verbose_name='Навыки')
     description = models.TextField(verbose_name='Описание вакансии')
@@ -75,8 +77,9 @@ class Resume(models.Model):
     surname = models.CharField(max_length=20, verbose_name='Фамилия')
     status_CHOISES = models.CharField(max_length=100, verbose_name='Готовность к работе', choices=status_CHOISES)
     salary = models.IntegerField(verbose_name='Зарплата')
-    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, verbose_name='Специализация', related_name='resume')
+    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE,
+                                  verbose_name='Специализация', related_name='resume')
     grade = models.CharField(max_length=100, verbose_name='Квалификация', choices=grade_CHOICES)
-    education = models.CharField(max_length=100, verbose_name='Образование')
-    experience = models.TextField(verbose_name='Описание вакансии')
+    education = models.TextField(verbose_name='Образование')
+    experience = models.TextField(verbose_name='Опыт работы')
     portfolio = models.URLField(max_length=200, verbose_name="ссылка на портфолио")

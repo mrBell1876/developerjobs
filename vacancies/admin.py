@@ -16,6 +16,7 @@ class SpecialtyAdmin(admin.ModelAdmin):
 class ApplicationsAdmin(admin.ModelAdmin):
     pass
 
+
 class VacanciesAdmin(admin.ModelAdmin):
     pass
 
